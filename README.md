@@ -1,93 +1,129 @@
-# Management_projet_digitaux
+# **App**
 
 
+## Project goals 🎯
 
-## Getting started
+This application predicts flight delays before departure and after landing, enabling travellers to anticipate disruptions and reorganize their plans accordingly — whether it's adjusting a pick-up time, rescheduling a connection, or managing last-minute logistics.
+By leveraging historical flight data and real-time indicators, it empowers individuals with actionable insights so they can stay one step ahead of airline disruptions.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+---
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
 
-## Add your files
+# Installation
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## Method 1 : with Docker Desktop
+
+1. Install **Docker Desktop**: From [www.docker.com](https://www.docker.com/products/docker-desktop/)
+   Start Docker Desktop.
+
+2. Clone the Git repository to your local machine and move there:
+
+```bash
+git clone https://gitlab-mi.univ-reims.fr/touz0012/management_projet_digitaux.git
+cd App
+```
+
+Launch our app
+```
+ docker compose -f .devcontainer/docker-compose.yaml up --build app
+```
+
+> This command builds the image, installs dependencies via **UV**,
+> and automatically runs your main script (`src/App/main.py`).
+
+To stop the app:
+
+```bash
+docker compose down
+```
+
+
+## Method 2 : by installing Python and UV manually
+
+1. Install **Python 3.13+**: From [Python.org](https://www.python.org/).
+
+2. Install **UV**: From [https://docs.astral.sh/uv](https://docs.astral.sh/uv).
+
+3. Clone the Git repository to your local machine and move there:
+
+```bash
+git clone https://gitlab-mi.univ-reims.fr/touz0012/management_projet_digitaux.git
+cd App
+```
+
+4. Run our app (caution: first run installs dependencies and can take a while):
+
+```bash
+uv sync
+uv run streamlit run src/App/main.py
 
 ```
-cd existing_repo
-git remote add origin https://gitlab-mi.univ-reims.fr/touz0012/management_projet_digitaux.git
-git branch -M main
-git push -uf origin main
-```
 
-## Integrate with your tools
+---
 
-* [Set up project integrations](https://gitlab-mi.univ-reims.fr/touz0012/management_projet_digitaux/-/settings/integrations)
 
-## Collaborate with your team
+# The repository is structured as follows : 
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+- **`.devcontainer/`** 📂
+    - Development container configuration
+- **`.streamlit/`** 📂
+    - Contains configuration files for the Streamlit interface.
+- **`data/`** 📂
+    - Contains the datasets used for the App project.
+        - **`processed/`** 📂 : cleaned and harmonized datasets ready for modeling    
+        - **`raw/`** 📂 : Original datasets dowloaded from FRED ans Eurostat APIs
+- **`documents/`** 📂
+    - Includes documentation related to the project.
+        - `App_customer_presentation_sprint_1.pptx` : Presentation slides for the first sprint review
+        - `logigramme_App.png` : Diagram illustrating the interface logic
+        - `roadmap_App.pdf` : The planning of this project
+        - `variable_glossary.pdf` : Glossary describing all variables and their economic meaning
+- **`src/`** 📂
+    - Contains Python scripts for App project.
+        - **`App/`** 📂
+            - Main application package
+                - **`analysis/`** 📂 : Scripts for exploratory data analysis and visualization
+                - **`config/`** 📂 : Centralized configuration: paths, constants, global variables, environment overrides
+                - **`data_ingestion/`** 📂 : Scripts for API calls, data extraction and storage
+                - **`interface/`** 📂 : Dashboard and visualisation layer for end users
+                - **`models/`** 📂 : Machine leaning models and pridiction logic
+                - **`preprocessing/`** 📂 : Data cleaning, transformation and feature engineering
+        - `__init__.py` : Package initializer
+        - `main.py` : Application entrypoint used to launch the App interface
+- **`tests/`** 📂 
+    - Contains unit tests to ensure code reliability and robustness.
+        - **`test_analysis/`** 📂 : Tests for data exploration, visualization, and statistical analysis functions
+        - **`test_data_ingestion/`** 📂 : Tests for data collection and API connection
+        - **`test_interface/`** 📂 : Tests for user interface components and dashboard rendering 
+        - **`test_models/`** 📂 : Tests for model training and evaluation
+        - **`test_preprocessing/`** 📂 : Tests for data transformation functions
+        - `conftest.py` : Shared pytest configurationand fixtures
 
-## Test and Deploy
+- `.gitattributes` : Git configuration for consistent line endings and diffs
+- `.gitignore` : Ignore temporary and environment-specific files
+- `gitlab-ci.yml` : GitLab CI/CD configuration for automated testing and deployment
+- `.pre-commit-config.yaml` : Pre-commit hooks: Ruff linting, formatting, whitespace cleanup, TOML checks
+- `README.md` : A document describing the project's organization and usage
+- `pyproject.toml` : Project configuration and dependency management (Poetry)
+- `uv.lock` : Fully resolved dependency lockfile ensuring reproducible environments
 
-Use the built-in continuous integration in GitLab.
+---
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
 
-***
+# Dataset 📚
 
-# Editing this README
+## About the database
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
 
-## Suggestions for a good README
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+---
 
-## Name
-Choose a self-explaining name for your project.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+# 🤝 Authors and acknowledgment
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+The application was developed by students of the Master's program in « Statistique pour l’Évaluation et la Prévision » at the University of Reims Champagne-Ardenne, Class of 2025–2026. Below are the contributors and their respective roles :  
+- **BELLO Sadate** (APE) : Data Scientist
+- **SEYE Pape Ndiogou** (APE) - alternant : Data Engineer
+- **AKODEKOU Crespin** (MA) : Data Analyst
+- **PHOLULAMDETH Antoine** (MA) : Front End / User Interface
+- **TOUZANI Sofiane** (MA) : Product Owner / Data Governance

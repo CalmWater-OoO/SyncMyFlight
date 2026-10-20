@@ -1,2 +1,39 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.env
+profiles.yml
+
+
+# Poetry / virtualenv
 .venv/
+venv/
+.poetry/
+
+# Packaging / build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Tests / coverage / tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+
+# Editors / OS
+.vscode/
+.idea/
 .DS_Store
+Thumbs.db
+
+# Secrets (never commit!)
+.env
+.env.*
+*.ipynb

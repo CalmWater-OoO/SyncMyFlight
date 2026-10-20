@@ -1,0 +1,13 @@
+﻿* text=auto eol=lf
+*.sh  text eol=lf
+*.bat text eol=crlf
+*.{md,txt,csv,json,yml,yaml,py,js,ts,java,kt,scala,go,rb,php,html,css} working-tree-encoding=UTF-8
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.zip binary
+*.exe binary
+*.pkl binary
+*.ipynb diff=jupyternotebook
