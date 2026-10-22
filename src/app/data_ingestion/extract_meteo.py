@@ -1,14 +1,20 @@
-import os
-import pandas as pd
-from datasets import load_dataset
+"""Extraction des relevés météorologiques.
 
-base_meteo = load_dataset("Algo0o/flight_delay", data_files="data_cleaned/Weather.csv", split="train")
+Exécution depuis la racine du projet :
+    uv run python src/app/data_ingestion/extract_meteo.py
+"""
 
-donnees_meteo = base_meteo.to_pandas()
+import logging
 
-chemin_script = os.path.dirname(os.path.abspath(__file__))
-chemin_export = os.path.join(chemin_script, "..", "..", "..", "data", "raw", "meteo_complete.csv")
+from app.config.paths import FICHIER_METEO
+from app.data_ingestion.telechargement import sauvegarder_csv, telecharger_table
 
-donnees_meteo.to_csv(chemin_export, index=False)
-print("Table meteo importee avec succes.")
 
+def main() -> None:
+    """Télécharge la table météo et l'enregistre dans ``data/raw``."""
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
+    sauvegarder_csv(telecharger_table("data_cleaned/Weather.csv"), FICHIER_METEO)
+
+
+if __name__ == "__main__":
+    main()

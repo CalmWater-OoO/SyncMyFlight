@@ -1,19 +1,34 @@
-import os
+"""Extraction des vols et constitution d'un échantillon stratifié par mois.
+
+Exécution depuis la racine du projet :
+    uv run python src/app/data_ingestion/extract.py
+"""
+
+import logging
+
 import pandas as pd
-from datasets import load_dataset
 
-base = load_dataset("Algo0o/flight_delay", data_files="data_cleaned/Airline.csv", split="train")
+from app.config.constants import GRAINE_ALEATOIRE, TAILLE_ECHANTILLON_PAR_MOIS
+from app.config.paths import FICHIER_VOLS_BRUTS
+from app.data_ingestion.telechargement import sauvegarder_csv, telecharger_table
 
-donnees = base.to_pandas()
+logger = logging.getLogger(__name__)
 
-donnees["FL_DATE"] = pd.to_datetime(donnees["FL_DATE"])
-donnees["MOIS"] = donnees["FL_DATE"].dt.month
 
-echantillon = donnees.groupby("MOIS").sample(n=41666, random_state=42)
+def echantillonner_par_mois(vols: pd.DataFrame) -> pd.DataFrame:
+    """Tire le même nombre de vols pour chaque mois, afin d'équilibrer les saisons."""
+    vols = vols.copy()
+    vols["FL_DATE"] = pd.to_datetime(vols["FL_DATE"])
+    vols["MOIS"] = vols["FL_DATE"].dt.month
+    return vols.groupby("MOIS").sample(n=TAILLE_ECHANTILLON_PAR_MOIS, random_state=GRAINE_ALEATOIRE)
 
-chemin_script = os.path.dirname(os.path.abspath(__file__))
-chemin_export = os.path.join(chemin_script, "..", "..", "..", "data", "raw", "echantillon_complet_2025.csv")
 
-echantillon.to_csv(chemin_export, index=False)
-print("Base stratifiee avec toutes les colonnes generee.")
+def main() -> None:
+    """Télécharge les vols, les échantillonne puis les enregistre dans ``data/raw``."""
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
+    vols = telecharger_table("data_cleaned/Airline.csv")
+    sauvegarder_csv(echantillonner_par_mois(vols), FICHIER_VOLS_BRUTS)
 
+
+if __name__ == "__main__":
+    main()

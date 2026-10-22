@@ -1,10 +1,10 @@
 """Module principal de l'API backend pour la prédiction des retards aériens."""
 
-from collections.abc import AsyncGenerator
+import os
+from collections.abc import AsyncGenerator, Generator
 from contextlib import asynccontextmanager
 from datetime import date
-import os
-from typing import Annotated, Generator, List, Optional, Union
+from typing import Annotated
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Query, status
@@ -18,21 +18,15 @@ from sqlalchemy.exc import SQLAlchemyError
 load_dotenv(os.path.join(os.path.dirname(__file__), "config", "variables.env"))
 
 URL_BASE_DONNEES = os.getenv(
-    "DATABASE_URL",
-    "postgresql+psycopg://postgres:password@localhost:5432/db_vols"
+    "DATABASE_URL", "postgresql+psycopg://postgres:password@localhost:5432/db_vols"
 )
 
 # Initialisation du moteur de base de données avec pool de connexions
-moteur: Engine = create_engine(
-    URL_BASE_DONNEES,
-    pool_size=10,
-    max_overflow=20,
-    pool_pre_ping=True
-)
+moteur: Engine = create_engine(URL_BASE_DONNEES, pool_size=10, max_overflow=20, pool_pre_ping=True)
 
 
 @asynccontextmanager
-async def cycle_de_vie(app: FastAPI) -> AsyncGenerator[None, None]:
+async def cycle_de_vie(app: FastAPI) -> AsyncGenerator[None]:
     """Gère le démarrage et l'arrêt propre des connexions du serveur."""
     yield
     moteur.dispose()
@@ -42,7 +36,7 @@ app = FastAPI(
     title="API Prédiction Retards Aériens",
     description="Backend pour requêter la vue consolidée PostgreSQL et alimenter le frontend.",
     version="1.0.0",
-    lifespan=cycle_de_vie
+    lifespan=cycle_de_vie,
 )
 
 # Configuration sécurisée du middleware CORS
@@ -67,22 +61,20 @@ class VolSortie(BaseModel):
     """Représentation d'un vol renvoyé par l'API."""
 
     date_vol: date = Field(..., alias="FL_DATE", description="Date du vol")
-    compagnie: Optional[str] = Field(None, alias="carrier_name", description="Nom du transporteur")
+    compagnie: str | None = Field(None, alias="carrier_name", description="Nom du transporteur")
     ville_depart: str = Field(..., alias="ORIGIN_CITY_NAME", description="Ville de départ")
     ville_arrivee: str = Field(..., alias="DEST_CITY_NAME", description="Ville d'arrivée")
-    retard_arrivee: Optional[float] = Field(None, alias="ARR_DELAY", description="Retard en minutes")
-    temperature_celsius: Optional[float] = Field(None, alias="t2m_C", description="Température au sol")
+    retard_arrivee: float | None = Field(None, alias="ARR_DELAY", description="Retard en minutes")
+    temperature_celsius: float | None = Field(None, alias="t2m_C", description="Température au sol")
 
-    model_config = {
-        "populate_by_name": True
-    }
+    model_config = {"populate_by_name": True}
 
 
 class ReponseVols(BaseModel):
     """Structure de la réponse pour la liste des vols."""
 
     total: int = Field(..., description="Nombre d'enregistrements retournés")
-    vols: List[VolSortie] = Field(..., description="Liste des données de vol")
+    vols: list[VolSortie] = Field(..., description="Liste des données de vol")
 
 
 class ReponseStatut(BaseModel):
@@ -92,7 +84,7 @@ class ReponseStatut(BaseModel):
     base_de_donnees: str
 
 
-def obtenir_connexion() -> Generator[Connection, None, None]:
+def obtenir_connexion() -> Generator[Connection]:
     """Fournit une connexion à la base de données et garantit sa fermeture."""
     connexion = moteur.connect()
     try:
@@ -106,25 +98,22 @@ def obtenir_connexion() -> Generator[Connection, None, None]:
     "/",
     response_model=ReponseStatut,
     status_code=status.HTTP_200_OK,
-    summary="État de santé de l'API"
+    summary="État de santé de l'API",
 )
 def verifier_statut() -> dict:
     """Point de contrôle pour valider l'accessibilité du service."""
-    return {
-        "statut": "en ligne",
-        "base_de_donnees": "PostgreSQL connecté"
-    }
+    return {"statut": "en ligne", "base_de_donnees": "PostgreSQL connecté"}
 
 
 @app.get(
     "/vols",
     response_model=ReponseVols,
     status_code=status.HTTP_200_OK,
-    summary="Récupérer un extrait de vols consolidés"
+    summary="Récupérer un extrait de vols consolidés",
 )
 def lister_vols(
+    connexion: Annotated[Connection, Depends(obtenir_connexion)],
     limite: Annotated[int, Query(ge=1, le=100, description="Nombre maximum de résultats")] = 10,
-    connexion: Connection = Depends(obtenir_connexion)
 ) -> dict:
     """Retourne la liste des vols combinés avec les compagnies et la météo."""
     requete = text("""
@@ -147,6 +136,5 @@ def lister_vols(
     except SQLAlchemyError as erreur:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erreur d'accès à la base de données : {str(erreur)}"
+            detail=f"Erreur d'accès à la base de données : {str(erreur)}",
         ) from erreur
-
