@@ -37,3 +37,8 @@ Thumbs.db
 .env
 .env.*
 *.ipynb
+
+# Données / modèles volumineux
+*.parquet
+*.joblib
+*.env

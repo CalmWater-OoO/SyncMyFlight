@@ -1,0 +1,68 @@
+-- Vue consolidée : vols + compagnies + météo à l'aéroport de départ.
+-- Utilisée par src/app/preprocessing/preparation.py.
+-- À exécuter après insertion.py (les tables table_vols, table_compagnies et table_meteo doivent exister).
+-- Attention : insertion.py remplace les tables (if_exists='replace') ; si la vue existe déjà,
+-- PostgreSQL refusera de supprimer les tables. Supprimer la vue avant : DROP VIEW IF EXISTS public.vue_vols_complets;
+
+CREATE OR REPLACE VIEW public.vue_vols_complets AS
+ SELECT v.airline_id,
+    v."FL_DATE",
+    v."OP_UNIQUE_CARRIER",
+    v."OP_CARRIER_FL_NUM",
+    v."ORIGIN_AIRPORT_ID",
+    v."ORIGIN",
+    v."ORIGIN_CITY_NAME",
+    v."ORIGIN_STATE_ABR",
+    v."ORIGIN_STATE_FIPS",
+    v."ORIGIN_STATE_NM",
+    v."ORIGIN_WAC",
+    v."DEST_AIRPORT_ID",
+    v."DEST",
+    v."DEST_CITY_NAME",
+    v."DEST_STATE_ABR",
+    v."DEST_STATE_FIPS",
+    v."DEST_STATE_NM",
+    v."DEST_WAC",
+    v."CRS_DEP_TIME",
+    v."DEP_TIME",
+    v."DEP_DELAY",
+    v."DEP_DELAY_NEW",
+    v."DEP_DEL15",
+    v."DEP_DELAY_GROUP",
+    v."DEP_TIME_BLK",
+    v."CRS_ARR_TIME",
+    v."ARR_TIME",
+    v."ARR_DELAY",
+    v."ARR_DEL15",
+    v."ARR_DELAY_GROUP",
+    v."ARR_TIME_BLK",
+    v."CANCELLED",
+    v."CANCELLATION_CODE",
+    v."DIVERTED",
+    v."CRS_ELAPSED_TIME",
+    v."ACTUAL_ELAPSED_TIME",
+    v."AIR_TIME",
+    v."FLIGHTS",
+    v."DISTANCE",
+    v."DISTANCE_GROUP",
+    v."CARRIER_DELAY",
+    v."WEATHER_DELAY",
+    v."NAS_DELAY",
+    v."SECURITY_DELAY",
+    v."LATE_AIRCRAFT_DELAY",
+    v."DEP_DELAY_OVER15",
+    v."ARR_DELAY_OVER15",
+    v."TOTAL_DELAY",
+    v."ANY_DELAY",
+    v."MOIS",
+    c.carrier_name,
+    m.t2m,
+    m.v10,
+    m.snc,
+    m.sde,
+    m."t2m_C"
+   FROM table_vols v
+     LEFT JOIN table_compagnies c ON v."OP_UNIQUE_CARRIER" = c.iata_code
+     LEFT JOIN table_meteo m ON v."FL_DATE" = m.date
+                            AND v."ORIGIN_CITY_NAME" = m.city_name
+                            AND v."ORIGIN_STATE_ABR" = m.state_abbr;

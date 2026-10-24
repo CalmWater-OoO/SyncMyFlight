@@ -1,14 +1,20 @@
-import os
-import pandas as pd
-from datasets import load_dataset
+"""Extraction de la table des compagnies aériennes.
 
-base_compagnies = load_dataset("Algo0o/flight_delay", data_files="data_cleaned/Carriers.csv", split="train")
+Exécution depuis la racine du projet :
+    uv run python src/app/data_ingestion/extract_company.py
+"""
 
-donnees = base_compagnies.to_pandas()
+import logging
 
-chemin_script = os.path.dirname(os.path.abspath(__file__))
-chemin_export = os.path.join(chemin_script, "..", "..", "..", "data", "raw", "compagnies.csv")
+from app.config.paths import FICHIER_COMPAGNIES
+from app.data_ingestion.telechargement import sauvegarder_csv, telecharger_table
 
-donnees.to_csv(chemin_export, index=False)
-print("Table des compagnies extraite avec succès.")
 
+def main() -> None:
+    """Télécharge la table des compagnies et l'enregistre dans ``data/raw``."""
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
+    sauvegarder_csv(telecharger_table("data_cleaned/Carriers.csv"), FICHIER_COMPAGNIES)
+
+
+if __name__ == "__main__":
+    main()
