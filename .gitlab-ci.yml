@@ -1,1 +1,44 @@
-﻿
+stages:
+  - lint
+  - test
+
+variables:
+  UV_CACHE_DIR: "$CI_PROJECT_DIR/.cache/uv"
+  PYTHONUNBUFFERED: "1"
+
+default:
+  image: python:3.13-slim
+  before_script:
+    - pip install --no-cache-dir uv
+    - uv sync --frozen
+  cache:
+    key:
+      files:
+        - uv.lock
+    paths:
+      - .cache/uv
+
+# ---------------------------------------------------------------------------
+# Stage : Lint (Obligatoire - bloque la fusion si le code ne respecte pas Ruff)
+# ---------------------------------------------------------------------------
+
+ruff:check:
+  stage: lint
+  script:
+    - uv run ruff check .
+
+ruff:format:
+  stage: lint
+  script:
+    - uv run ruff format --check .
+
+# ---------------------------------------------------------------------------
+# Stage : Test (Exécution de la suite de tests pytest)
+# ---------------------------------------------------------------------------
+
+pytest:
+  stage: test
+  script:
+    - uv run pytest
+  # allow_failure évite de casser la CI tant que les fichiers de tests (tests/*) sont encore vides
+  allow_failure: true
